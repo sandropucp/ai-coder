@@ -36,7 +36,7 @@
 3. /model
 4. /theme
 
-# GitHub Setup
+## GitHub Setup
 
 git init
 git add README.md
@@ -49,8 +49,7 @@ git pull
 git checkout -b feature/step_01_initial
 UPDATES
 git push --set-upstream origin feature/step_01_initial
-create PR
-git merge feature/step_01
+create PR to merge to master
 
 ## General Comments
 
