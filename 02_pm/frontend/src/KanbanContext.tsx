@@ -2,31 +2,22 @@ import React, { createContext, useContext, useReducer, type ReactNode } from 're
 import type { BoardState, Card } from './types';
 
 export type Action =
+  | { type: 'SET_BOARD'; state: BoardState }
   | { type: 'ADD_CARD'; columnId: string; title: string; details: string }
   | { type: 'DELETE_CARD'; cardId: string; columnId: string }
   | { type: 'MOVE_CARD'; cardId: string; sourceColumnId: string; destinationColumnId: string; destinationIndex: number }
   | { type: 'RENAME_COLUMN'; columnId: string; newTitle: string };
 
-const initialState: BoardState = {
-  cards: {
-    'card-1': { id: 'card-1', title: 'Research competitors', details: 'Analyze top 3 competitors in the space' },
-    'card-2': { id: 'card-2', title: 'Design system', details: 'Create a consistent color palette and typography' },
-    'card-3': { id: 'card-3', title: 'API implementation', details: 'Set up the basic Express server' },
-    'card-4': { id: 'card-4', title: 'Unit tests', details: 'Write tests for the main business logic' },
-    'card-5': { id: 'card-5', title: 'Deployment', details: 'Configure CI/CD pipeline' },
-  },
-  columns: {
-    'col-1': { id: 'col-1', title: 'To Do', cardIds: ['card-1', 'card-2'] },
-    'col-2': { id: 'col-2', title: 'In Progress', cardIds: ['card-3'] },
-    'col-3': { id: 'col-3', title: 'Review', cardIds: ['card-4'] },
-    'col-4': { id: 'col-4', title: 'Testing', cardIds: [] },
-    'col-5': { id: 'col-5', title: 'Done', cardIds: ['card-5'] },
-  },
-  columnOrder: ['col-1', 'col-2', 'col-3', 'col-4', 'col-5'],
+const emptyState: BoardState = {
+  cards: {},
+  columns: {},
+  columnOrder: [],
 };
 
 export function kanbanReducer(state: BoardState, action: Action): BoardState {
   switch (action.type) {
+    case 'SET_BOARD':
+      return action.state;
     case 'ADD_CARD': {
       const newCardId = `card-${Date.now()}`;
       const newCard: Card = { id: newCardId, title: action.title, details: action.details };
@@ -109,12 +100,68 @@ export function kanbanReducer(state: BoardState, action: Action): BoardState {
 const KanbanContext = createContext<{
   state: BoardState;
   dispatch: React.Dispatch<Action>;
+  isLoading: boolean;
+  error: string | null;
+  refreshBoard: () => Promise<void>;
 } | undefined>(undefined);
 
 export function KanbanProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(kanbanReducer, initialState);
+  const [state, dispatch] = useReducer(kanbanReducer, emptyState);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const isInitialMount = React.useRef(true);
+
+  const fetchBoard = async () => {
+    try {
+      const response = await fetch('/api/board');
+      if (response.ok) {
+        const data = await response.json();
+        dispatch({ type: 'SET_BOARD', state: data });
+      } else {
+        setError('Failed to load board');
+      }
+    } catch (err) {
+      setError('Connection error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch initial state
+  React.useEffect(() => {
+    fetchBoard();
+  }, []);
+
+  const refreshBoard = async () => {
+    await fetchBoard();
+  };
+
+  // Sync state changes to backend
+  React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const syncBoard = async () => {
+      try {
+        await fetch('/api/board', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state),
+        });
+      } catch (err) {
+        console.error('Failed to sync board:', err);
+      }
+    };
+
+    // Simple debounce to avoid too many requests during drag
+    const timeoutId = setTimeout(syncBoard, 500);
+    return () => clearTimeout(timeoutId);
+  }, [state]);
+
   return (
-    <KanbanContext.Provider value={{ state, dispatch }}>
+    <KanbanContext.Provider value={{ state, dispatch, isLoading, error, refreshBoard }}>
       {children}
     </KanbanContext.Provider>
   );
