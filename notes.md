@@ -36,6 +36,22 @@
 3. /model
 4. /theme
 
+# GitHub Setup
+
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:sandropucp/ai-coder.git
+git push -u origin master
+
+git checkout master
+git pull
+git checkout -b feature/step_01_initial
+UPDATES
+git push --set-upstream origin feature/step_01_initial
+create PR
+git merge feature/step_01
+
 ## General Comments
 
 1. When open test in browser close broser, Ctrl + C to finish it and tell the agent continue
