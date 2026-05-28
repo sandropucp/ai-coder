@@ -48,7 +48,7 @@ git checkout master
 git pull
 git checkout -b feature/step_01_initial
 UPDATES
-git push -origin feature/step_01_initial
+git push --set-upstream origin feature/step_01_initial
 create PR
 git merge feature/step_01
 
