@@ -8,7 +8,6 @@ import {
   useSensors,
   DragOverlay,
   pointerWithin,
-  getFirstCollision,
   type DragEndEvent,
   type DragStartEvent,
   type DragOverEvent,
@@ -20,7 +19,7 @@ import { Column } from './Column';
 import { CardUI } from './CardUI';
 
 export const Board: React.FC = () => {
-  const { state, dispatch } = useKanban();
+  const { state, dispatch, isLoading, error } = useKanban();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -133,6 +132,14 @@ export const Board: React.FC = () => {
 
   const activeCard = activeId ? state.cards[activeId] : null;
   const activeCardColumnId = activeId ? findColumnOfCard(activeId) : null;
+
+  if (isLoading) {
+    return <div className="board-message">Loading your board...</div>;
+  }
+
+  if (error) {
+    return <div className="board-message error">{error}</div>;
+  }
 
   return (
     <DndContext

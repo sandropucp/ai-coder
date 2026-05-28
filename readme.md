@@ -53,5 +53,13 @@ create PR to merge to master
 
 ## General Comments
 
-1. When open test in browser close broser, Ctrl + C to finish it and tell the agent continue
-2. Sometimes when you ask the agent to fix something it tries many times and it think he did not fix but he did. Test it in your side and tell him he already fix it.
+### Step 1
+
+1. cd 01_kanban
+2. When open test in browser close broser, Ctrl + C to finish it and tell the agent continue
+3. Sometimes when you ask the agent to fix something it tries many times and it think he did not fix but he did. Test it in your side and tell him he already fix it.
+
+### Step 2
+
+1. cd 02_pm
+2. Please review Gemini.md and the plan and let me know if you have any question.Do not do any work yet.
