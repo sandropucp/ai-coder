@@ -63,3 +63,4 @@ create PR to merge to master
 
 1. cd 02_pm
 2. Please review Gemini.md and the plan and let me know if you have any question.Do not do any work yet.
+3. Please carry out a comprenhensive code review in the entire repo, and write a report with actions to code_review.md in the docs folder.
